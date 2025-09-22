@@ -7,7 +7,7 @@ server {
     real_ip_recursive on;
 
     location / {
-        allow ${ALLOWED_LAN};
+        ${ALLOWED_BLOCKS}
         deny all;
 
         root /usr/share/nginx/html;
