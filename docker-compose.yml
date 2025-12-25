@@ -1,5 +1,6 @@
 services:
   cdn:
+    image: eacer/simple-cdn-service:250922
     ports:
       - "8888:80"
     environment:
