@@ -1,3 +1,10 @@
+log_format secured '$remote_addr - $remote_user [$time_local] "$request_method $uri $server_protocol" $status $body_bytes_sent "$http_referer" "$http_user_agent"';
+
+map $arg_key $secured_key_ok {
+    default 0;
+    ${SECURED_KEY_MAP}
+}
+
 server {
     listen 80;
     server_name ${SERVER_NAME};
@@ -5,6 +12,29 @@ server {
     set_real_ip_from 0.0.0.0/0;
     real_ip_header X-Forwarded-For;
     real_ip_recursive on;
+
+    location ^~ /secured/ {
+        ${ALLOWED_BLOCKS}
+        deny all;
+
+        if ($secured_key_ok = 0) {
+            return 403;
+        }
+
+        root /usr/share/nginx/html;
+        try_files $uri =404;
+        autoindex off;
+        log_not_found off;
+        access_log /var/log/nginx/access.log secured;
+        add_header Access-Control-Allow-Origin *;
+    }
+
+    location = /favicon.ico {
+        ${ALLOWED_BLOCKS}
+        deny all;
+
+        root /usr/share/nginx/brand;
+    }
 
     location / {
         ${ALLOWED_BLOCKS}
